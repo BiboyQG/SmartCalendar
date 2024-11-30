@@ -44,6 +44,9 @@ export default function AddEventScreen() {
       const suggestion = await aiService.suggestTime(fixedEvents, newEvent);
       if (suggestion) {
         newEvent.aiSuggestion = suggestion;
+        newEvent.startTime = suggestion.startingTime;
+        const startDate = new Date(suggestion.startingTime);
+        newEvent.endTime = new Date(startDate.getTime() + (newEvent.duration as number) * 60000).toISOString();
       }
     }
 
