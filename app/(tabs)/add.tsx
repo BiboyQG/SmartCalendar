@@ -14,6 +14,7 @@ export default function AddEventScreen() {
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
   const [note, setNote] = useState('');
+  const [duration, setDuration] = useState('');
 
   const handleSubmit = async () => {
     const newEvent: Event = {
@@ -23,6 +24,7 @@ export default function AddEventScreen() {
       type,
       startTime: type === 'fixed' ? startTime.toISOString() : undefined,
       endTime: type === 'fixed' ? endTime.toISOString() : undefined,
+      duration: type === 'flexible' ? parseInt(duration, 10) : undefined,
       note
     };
 
@@ -64,18 +66,34 @@ export default function AddEventScreen() {
         />
       </View>
 
-      {type === 'fixed' && (
+      {type === 'flexible' ? (
         <View className="mb-4">
-          <DateTimePicker
-            value={startTime}
-            mode="datetime"
-            onChange={(_, date) => date && setStartTime(date)}
+          <TextInput
+            className="p-2 border border-gray-300 dark:border-gray-700 rounded"
+            placeholder="Duration (minutes)"
+            value={duration}
+            onChangeText={setDuration}
+            keyboardType="numeric"
           />
-          <DateTimePicker
-            value={endTime}
-            mode="datetime"
-            onChange={(_, date) => date && setEndTime(date)}
-          />
+        </View>
+      ) : (
+        <View className="mb-4">
+          <View className="mb-2">
+            <ThemedText>Start Time:</ThemedText>
+            <DateTimePicker
+              value={startTime}
+              mode="datetime"
+              onChange={(_, date) => date && setStartTime(date)}
+            />
+          </View>
+          <View>
+            <ThemedText>End Time:</ThemedText>
+            <DateTimePicker
+              value={endTime}
+              mode="datetime"
+              onChange={(_, date) => date && setEndTime(date)}
+            />
+          </View>
         </View>
       )}
 

@@ -7,6 +7,7 @@ export interface Event {
   type: EventType;
   startTime?: string;
   endTime?: string;
+  duration?: number;
   note?: string;
   aiSuggestion?: {
     startingTime: string;
