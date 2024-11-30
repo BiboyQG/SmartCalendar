@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import { Calendar, DateData } from 'react-native-calendars';
 import { format } from 'date-fns';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
@@ -21,22 +21,39 @@ export default function ScheduleScreen() {
 
   const getDayEvents = () => {
     return events.filter(event => {
-      const eventDate = event.startTime?.split('T')[0];
+      if (!event.startTime) return false;
+      const eventDate = format(new Date(event.startTime), 'yyyy-MM-dd');
       return eventDate === selectedDate;
     });
+  };
+
+  const getMarkedDates = () => {
+    const marked: { [key: string]: { selected?: boolean; marked?: boolean } } = {
+      [selectedDate]: { selected: true }
+    };
+    
+    events.forEach(event => {
+      if (event.startTime) {
+        const eventDate = format(new Date(event.startTime), 'yyyy-MM-dd');
+        if (eventDate !== selectedDate) {
+          marked[eventDate] = { marked: true };
+        }
+      }
+    });
+    
+    return marked;
   };
 
   return (
     <View className="flex-1 bg-white dark:bg-gray-900">
       <Calendar
-        onDayPress={day => setSelectedDate(day.dateString)}
-        markedDates={{
-          [selectedDate]: { selected: true }
-        }}
+        onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
+        markedDates={getMarkedDates()}
         theme={{
           selectedDayBackgroundColor: '#3b82f6',
           todayTextColor: '#3b82f6',
           arrowColor: '#3b82f6',
+          dotColor: '#3b82f6',
         }}
       />
       
