@@ -52,7 +52,6 @@ export default function AddEventScreen() {
 
     const events = await storage.getEvents();
     await storage.saveEvents([...events, newEvent]);
-    console.log('Events saved:', [...events, newEvent]);
     
     // Reset all form values
     setTitle('');
