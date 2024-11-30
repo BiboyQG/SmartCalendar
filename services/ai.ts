@@ -28,7 +28,9 @@ export const aiService = {
         ]
       });
 
-      const suggestion = JSON.parse(response.choices[0].message.content);
+      const content = response.choices[0].message.content;
+      if (!content) return null;
+      const suggestion = JSON.parse(content);
       return suggestion as AISuggestion;
     } catch (error) {
       console.error('Error getting AI suggestion:', error);
