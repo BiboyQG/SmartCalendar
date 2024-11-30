@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { format } from 'date-fns';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
 import type { Event } from '@/types/event';
@@ -10,9 +12,11 @@ export default function ScheduleScreen() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadEvents();
+    }, [])
+  );
 
   const loadEvents = async () => {
     const storedEvents = await storage.getEvents();
