@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Switch } from 'react-native';
 import { router } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
 import { aiService } from '@/services/ai';
@@ -11,20 +10,31 @@ export default function AddEventScreen() {
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [type, setType] = useState<EventType>('fixed');
-  const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [note, setNote] = useState('');
   const [duration, setDuration] = useState('');
 
   const handleSubmit = async () => {
+    // Validate datetime format for fixed events
+    if (type === 'fixed') {
+      const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+      if (!dateRegex.test(startTime) || !dateRegex.test(endTime)) {
+        alert('Please enter dates in format: YYYY-MM-DD HH:mm');
+        return;
+      }
+    }
+
     const newEvent: Event = {
       id: Date.now().toString(),
       title,
       location,
       type,
-      startTime: type === 'fixed' ? startTime.toISOString() : undefined,
-      endTime: type === 'fixed' ? endTime.toISOString() : undefined,
-      duration: type === 'flexible' ? parseInt(duration, 10) : undefined,
+      startTime: type === 'fixed' ? new Date(startTime.replace(' ', 'T')).toISOString() : undefined,
+      endTime: type === 'fixed' ? new Date(endTime.replace(' ', 'T')).toISOString() : undefined,
+      duration: type === 'flexible' 
+        ? parseInt(duration, 10) 
+        : Math.round((new Date(endTime.replace(' ', 'T')).getTime() - new Date(startTime.replace(' ', 'T')).getTime()) / (1000 * 60)),
       note
     };
 
@@ -39,6 +49,17 @@ export default function AddEventScreen() {
 
     const events = await storage.getEvents();
     await storage.saveEvents([...events, newEvent]);
+    console.log('Events saved:', [...events, newEvent]);
+    
+    // Reset all form values
+    setTitle('');
+    setLocation('');
+    setType('fixed');
+    setStartTime('');
+    setEndTime('');
+    setNote('');
+    setDuration('');
+    
     router.back();
   };
 
@@ -62,7 +83,7 @@ export default function AddEventScreen() {
         <ThemedText>Flexible Event</ThemedText>
         <Switch
           value={type === 'flexible'}
-          onValueChange={(value) => setType(value ? 'flexible' : 'fixed')}
+          onValueChange={(value: boolean) => setType(value ? 'flexible' : 'fixed')}
         />
       </View>
 
@@ -79,19 +100,21 @@ export default function AddEventScreen() {
       ) : (
         <View className="mb-4">
           <View className="mb-2">
-            <ThemedText>Start Time:</ThemedText>
-            <DateTimePicker
+            <ThemedText>Start Time (YYYY-MM-DD HH:mm):</ThemedText>
+            <TextInput
+              className="p-2 border border-gray-300 dark:border-gray-700 rounded"
+              placeholder="2024-03-15 14:30"
               value={startTime}
-              mode="datetime"
-              onChange={(_, date) => date && setStartTime(date)}
+              onChangeText={setStartTime}
             />
           </View>
           <View>
-            <ThemedText>End Time:</ThemedText>
-            <DateTimePicker
+            <ThemedText>End Time (YYYY-MM-DD HH:mm):</ThemedText>
+            <TextInput
+              className="p-2 border border-gray-300 dark:border-gray-700 rounded"
+              placeholder="2024-03-15 15:30"
               value={endTime}
-              mode="datetime"
-              onChange={(_, date) => date && setEndTime(date)}
+              onChangeText={setEndTime}
             />
           </View>
         </View>
