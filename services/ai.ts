@@ -14,19 +14,19 @@ interface AISuggestion {
 export const aiService = {
   async suggestTime(fixedEvents: Event[], flexibleEvent: Event): Promise<AISuggestion | null> {
     try {
-      const response = await openai.chat.completions.create({
-        model: "Qwen/Qwen2.5-14B-Instruct-AWQ",
-        messages: [
-          {
-            role: "system",
-            content: "You are a smart calendar assistant. You help schedule flexible events around fixed events. Always respond with a JSON object containing startingTime (ISO string) and reason (string explaining the choice)."
-          },
-          {
-            role: "user",
-            content: `Fixed events: ${JSON.stringify(fixedEvents)}. Please suggest a time for this flexible event: ${JSON.stringify(flexibleEvent)}`
-          }
-        ]
-      });
+      // const response = await openai.chat.completions.create({
+      //   model: "Qwen/Qwen2.5-14B-Instruct-AWQ",
+      //   messages: [
+      //     {
+      //       role: "system",
+      //       content: "You are a smart calendar assistant. You help schedule flexible events around fixed events. Always respond with a JSON object containing startingTime (ISO string) and reason (string explaining the choice)."
+      //     },
+      //     {
+      //       role: "user",
+      //       content: `Fixed events: ${JSON.stringify(fixedEvents)}. Please suggest a time for this flexible event: ${JSON.stringify(flexibleEvent)}`
+      //     }
+      //   ]
+      // });
 
       // const content = response.choices[0].message.content;
       // if (!content) return null;
