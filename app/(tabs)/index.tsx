@@ -24,11 +24,16 @@ export default function ScheduleScreen() {
   };
 
   const getDayEvents = () => {
-    return events.filter(event => {
-      if (!event.startTime) return false;
-      const eventDate = format(new Date(event.startTime), 'yyyy-MM-dd');
-      return eventDate === selectedDate;
-    });
+    return events
+      .filter(event => {
+        if (!event.startTime) return false;
+        const eventDate = format(new Date(event.startTime), 'yyyy-MM-dd');
+        return eventDate === selectedDate;
+      })
+      .sort((a, b) => {
+        if (!a.startTime || !b.startTime) return 0;
+        return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+      });
   };
 
   const getMarkedDates = () => {
