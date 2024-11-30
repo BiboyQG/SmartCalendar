@@ -28,7 +28,22 @@ export const aiService = {
         ]
       });
 
-      const content = response.choices[0].message.content;
+      // const content = response.choices[0].message.content;
+      // if (!content) return null;
+      // const suggestion = JSON.parse(content);
+      // return suggestion as AISuggestion;
+
+      const mockResponse = {
+        choices: [{
+          message: {
+            content: JSON.stringify({
+              startingTime: "2024-11-29T14:30:00.000Z",
+              reason: "I suggest this time slot because it's between your morning meeting at 11:00 AM and your afternoon appointment at 4:00 PM, providing enough buffer time on both sides. This timing also aligns well with typical productive hours and allows for the 1-hour duration of your flexible event."
+            })
+          }
+        }]
+      };
+      const content = mockResponse.choices[0].message.content;
       if (!content) return null;
       const suggestion = JSON.parse(content);
       return suggestion as AISuggestion;
