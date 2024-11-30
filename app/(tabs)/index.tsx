@@ -1,74 +1,69 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { useEffect, useState } from 'react';
+import { View, ScrollView } from 'react-native';
+import { Calendar } from 'react-native-calendars';
+import { format } from 'date-fns';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { storage } from '@/utils/storage';
+import type { Event } from '@/types/event';
 
-export default function HomeScreen() {
+export default function ScheduleScreen() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    const storedEvents = await storage.getEvents();
+    setEvents(storedEvents);
+  };
+
+  const getDayEvents = () => {
+    return events.filter(event => {
+      const eventDate = event.startTime?.split('T')[0];
+      return eventDate === selectedDate;
+    });
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
+    <View className="flex-1 bg-white dark:bg-gray-900">
+      <Calendar
+        onDayPress={day => setSelectedDate(day.dateString)}
+        markedDates={{
+          [selectedDate]: { selected: true }
+        }}
+        theme={{
+          selectedDayBackgroundColor: '#3b82f6',
+          todayTextColor: '#3b82f6',
+          arrowColor: '#3b82f6',
+        }}
+      />
+      
+      <ScrollView className="flex-1 px-4 py-2">
+        <ThemedText type="subtitle" className="mb-4">
+          Events for {selectedDate}
         </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        
+        {getDayEvents().map(event => (
+          <View 
+            key={event.id}
+            className="p-4 mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg"
+          >
+            <ThemedText type="defaultSemiBold">{event.title}</ThemedText>
+            <ThemedText>{event.location}</ThemedText>
+            {event.startTime && (
+              <ThemedText>
+                {format(new Date(event.startTime), 'HH:mm')}
+                {event.endTime && ` - ${format(new Date(event.endTime), 'HH:mm')}`}
+              </ThemedText>
+            )}
+            <ThemedText className="text-gray-600 dark:text-gray-400">
+              {event.type}
+            </ThemedText>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
