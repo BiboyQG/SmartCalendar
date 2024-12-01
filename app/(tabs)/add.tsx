@@ -42,9 +42,8 @@ export default function AddEventScreen() {
       console.log("[Debug] Before AI suggestion");
       if (type === 'flexible') {
         const events = await storage.getEvents();
-        const fixedEvents = events.filter(e => e.type === 'fixed');
         console.log("[Debug] Calling AI service");
-        const suggestion = await aiService.suggestTime(fixedEvents, newEvent);
+        const suggestion = await aiService.suggestTime(events, newEvent);
         console.log("[Debug] AI suggestion received:", suggestion);
         
         if (suggestion) {
