@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Switch } from 'react-native';
+import { View, TextInput, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
@@ -14,6 +14,7 @@ export default function AddEventScreen() {
   const [endTime, setEndTime] = useState('');
   const [note, setNote] = useState('');
   const [duration, setDuration] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     try {
@@ -41,52 +42,62 @@ export default function AddEventScreen() {
 
       console.log("[Debug] Before AI suggestion");
       if (type === 'flexible') {
-        const events = await storage.getEvents();
-        console.log("[Debug] Calling AI service");
-        const suggestion = await aiService.suggestTime(events, newEvent);
-        console.log("[Debug] AI suggestion received:", suggestion);
-        
-        if (suggestion) {
-          try {
-            console.log("[Debug] Raw suggestion:", suggestion);
-            console.log("[Debug] Suggestion type:", typeof suggestion);
-            
-            // Ensure we have a proper object by parsing if it's a string
-            const suggestionData = typeof suggestion === 'string' ? JSON.parse(suggestion) : suggestion;
-            console.log("[Debug] Processed suggestion:", suggestionData);
-            
-            const startDate = new Date(suggestionData.startingTime);
-            console.log("[Debug] Start date components:", {
-              input: suggestionData.startingTime,
-              parsed: startDate,
-              timestamp: startDate.getTime()
-            });
-            
-            if (isNaN(startDate.getTime())) {
-              throw new Error(`Invalid date format. Received: ${suggestionData.startingTime}`);
-            }
+        setIsLoading(true);
+        try {
+          const events = await storage.getEvents();
+          console.log("[Debug] Calling AI service");
+          const suggestion = await aiService.suggestTime(events, newEvent);
+          console.log("[Debug] AI suggestion received:", suggestion);
+          
+          if (suggestion) {
+            try {
+              console.log("[Debug] Raw suggestion:", suggestion);
+              console.log("[Debug] Suggestion type:", typeof suggestion);
+              
+              // Ensure we have a proper object by parsing if it's a string
+              const suggestionData = typeof suggestion === 'string' ? JSON.parse(suggestion) : suggestion;
+              console.log("[Debug] Processed suggestion:", suggestionData);
+              
+              const startDate = new Date(suggestionData.startingTime);
+              console.log("[Debug] Start date components:", {
+                input: suggestionData.startingTime,
+                parsed: startDate,
+                timestamp: startDate.getTime()
+              });
+              
+              if (isNaN(startDate.getTime())) {
+                throw new Error(`Invalid date format. Received: ${suggestionData.startingTime}`);
+              }
 
-            // Update the event with the suggestion
-            newEvent.aiSuggestion = suggestionData;
-            newEvent.startTime = new Date(suggestionData.startingTime).toISOString();
-            
-            // Calculate end time
-            const durationInMs = (newEvent.duration as number) * 60000;
-            const endTimeMs = startDate.getTime() + durationInMs;
-            newEvent.endTime = new Date(endTimeMs).toISOString();
-            
-            console.log("[Debug] Final event data:", {
-              startTime: newEvent.startTime,
-              endTime: newEvent.endTime,
-              duration: newEvent.duration,
-              durationInMs
-            });
-          } catch (dateError) {
-            console.error("[Debug] Date calculation error:", dateError);
-            console.error("[Debug] Current event state:", newEvent);
-            alert('Error processing the suggested time. Please try again.');
-            return;
+              // Update the event with the suggestion
+              newEvent.aiSuggestion = suggestionData;
+              newEvent.startTime = new Date(suggestionData.startingTime).toISOString();
+              
+              // Calculate end time
+              const durationInMs = (newEvent.duration as number) * 60000;
+              const endTimeMs = startDate.getTime() + durationInMs;
+              newEvent.endTime = new Date(endTimeMs).toISOString();
+              
+              console.log("[Debug] Final event data:", {
+                startTime: newEvent.startTime,
+                endTime: newEvent.endTime,
+                duration: newEvent.duration,
+                durationInMs
+              });
+            } catch (dateError) {
+              console.error("[Debug] Date calculation error:", dateError);
+              console.error("[Debug] Current event state:", newEvent);
+              alert('Error processing the suggested time. Please try again.');
+              return;
+            }
           }
+        } catch (dateError) {
+          console.error("[Debug] Date calculation error:", dateError);
+          console.error("[Debug] Current event state:", newEvent);
+          alert('Error processing the suggested time. Please try again.');
+          return;
+        } finally {
+          setIsLoading(false);
         }
       }
 
@@ -107,6 +118,7 @@ export default function AddEventScreen() {
       
       router.back();
     } catch (error) {
+      setIsLoading(false);
       console.error("[Debug] Error in handleSubmit:", error);
       alert('An error occurred while saving the event');
     }
@@ -180,8 +192,13 @@ export default function AddEventScreen() {
       <TouchableOpacity
         className="bg-blue-500 p-3 rounded"
         onPress={handleSubmit}
+        disabled={isLoading}
       >
-        <ThemedText className="text-white text-center">Add Event</ThemedText>
+        {isLoading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <ThemedText className="text-white text-center">Add Event</ThemedText>
+        )}
       </TouchableOpacity>
     </View>
   );
