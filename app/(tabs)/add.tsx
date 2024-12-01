@@ -16,56 +16,101 @@ export default function AddEventScreen() {
   const [duration, setDuration] = useState('');
 
   const handleSubmit = async () => {
-    // Validate datetime format for fixed events
-    if (type === 'fixed') {
-      const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
-      if (!dateRegex.test(startTime) || !dateRegex.test(endTime)) {
-        alert('Please enter dates in format: YYYY-MM-DD HH:mm');
-        return;
+    try {
+      // Validate datetime format for fixed events
+      if (type === 'fixed') {
+        const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+        if (!dateRegex.test(startTime) || !dateRegex.test(endTime)) {
+          alert('Please enter dates in format: YYYY-MM-DD HH:mm');
+          return;
+        }
       }
-    }
 
-    const newEvent: Event = {
-      id: Date.now().toString(),
-      title,
-      location,
-      type,
-      startTime: type === 'fixed' ? new Date(startTime.replace(' ', 'T')).toISOString() : undefined,
-      endTime: type === 'fixed' ? new Date(endTime.replace(' ', 'T')).toISOString() : undefined,
-      duration: type === 'flexible' 
-        ? parseInt(duration, 10) 
-        : Math.round((new Date(endTime.replace(' ', 'T')).getTime() - new Date(startTime.replace(' ', 'T')).getTime()) / (1000 * 60)),
-      note
-    };
+      const newEvent: Event = {
+        id: Date.now().toString(),
+        title,
+        location,
+        type,
+        startTime: type === 'fixed' ? new Date(startTime.replace(' ', 'T')).toISOString() : undefined,
+        endTime: type === 'fixed' ? new Date(endTime.replace(' ', 'T')).toISOString() : undefined,
+        duration: type === 'flexible' 
+          ? parseInt(duration, 10) 
+          : Math.round((new Date(endTime.replace(' ', 'T')).getTime() - new Date(startTime.replace(' ', 'T')).getTime()) / (1000 * 60)),
+        note
+      };
 
-    if (type === 'flexible') {
+      console.log("[Debug] Before AI suggestion");
+      if (type === 'flexible') {
+        const events = await storage.getEvents();
+        const fixedEvents = events.filter(e => e.type === 'fixed');
+        console.log("[Debug] Calling AI service");
+        const suggestion = await aiService.suggestTime(fixedEvents, newEvent);
+        console.log("[Debug] AI suggestion received:", suggestion);
+        
+        if (suggestion) {
+          try {
+            console.log("[Debug] Raw suggestion:", suggestion);
+            console.log("[Debug] Suggestion type:", typeof suggestion);
+            
+            // Ensure we have a proper object by parsing if it's a string
+            const suggestionData = typeof suggestion === 'string' ? JSON.parse(suggestion) : suggestion;
+            console.log("[Debug] Processed suggestion:", suggestionData);
+            
+            const startDate = new Date(suggestionData.startingTime);
+            console.log("[Debug] Start date components:", {
+              input: suggestionData.startingTime,
+              parsed: startDate,
+              timestamp: startDate.getTime()
+            });
+            
+            if (isNaN(startDate.getTime())) {
+              throw new Error(`Invalid date format. Received: ${suggestionData.startingTime}`);
+            }
+
+            // Update the event with the suggestion
+            newEvent.aiSuggestion = suggestionData;
+            newEvent.startTime = suggestionData.startingTime;
+            
+            // Calculate end time
+            const durationInMs = (newEvent.duration as number) * 60000;
+            const endTimeMs = startDate.getTime() + durationInMs;
+            newEvent.endTime = new Date(endTimeMs).toISOString();
+            
+            console.log("[Debug] Final event data:", {
+              startTime: newEvent.startTime,
+              endTime: newEvent.endTime,
+              duration: newEvent.duration,
+              durationInMs
+            });
+          } catch (dateError) {
+            console.error("[Debug] Date calculation error:", dateError);
+            console.error("[Debug] Current event state:", newEvent);
+            alert('Error processing the suggested time. Please try again.');
+            return;
+          }
+        }
+      }
+
       const events = await storage.getEvents();
-      const fixedEvents = events.filter(e => e.type === 'fixed');
-      const suggestion = await aiService.suggestTime(fixedEvents, newEvent);
-      if (suggestion) {
-        newEvent.aiSuggestion = suggestion;
-        newEvent.startTime = suggestion.startingTime;
-        const startDate = new Date(suggestion.startingTime);
-        newEvent.endTime = new Date(startDate.getTime() + (newEvent.duration as number) * 60000).toISOString();
-      }
+      console.log("[Debug] New event:", newEvent);
+      await storage.saveEvents([...events, newEvent]);
+      const savedEvents = await storage.getEvents();
+      console.log("[Debug] Events saved:", savedEvents);
+      
+      // Reset all form values
+      setTitle('');
+      setLocation('');
+      setType('fixed');
+      setStartTime('');
+      setEndTime('');
+      setNote('');
+      setDuration('');
+      
+      router.back();
+    } catch (error) {
+      console.error("[Debug] Error in handleSubmit:", error);
+      alert('An error occurred while saving the event');
     }
-
-    const events = await storage.getEvents();
-    console.log("New event:", newEvent);
-    await storage.saveEvents([...events, newEvent]);
-    const savedEvents = await storage.getEvents();
-    console.log("Events saved:", savedEvents);
-    
-    // Reset all form values
-    setTitle('');
-    setLocation('');
-    setType('fixed');
-    setStartTime('');
-    setEndTime('');
-    setNote('');
-    setDuration('');
-    
-    router.back();
   };
 
   return (
