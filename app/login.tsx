@@ -16,33 +16,44 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center items-center p-6 bg-white dark:bg-gray-900">
-      <View className="w-full max-w-sm space-y-4">
-        <ThemedText type="title" className="text-center mb-8">
-          Smart Calendar
-        </ThemedText>
+    <View className="flex-1 justify-center items-center p-8 bg-gray-50 dark:bg-gray-900">
+      <View className="w-full max-w-sm space-y-6">
+        <View className="space-y-2">
+          <ThemedText type="title" className="text-center text-3xl font-bold text-gray-900 dark:text-white">
+            👋 Smart Calendar
+          </ThemedText>
+        </View>
         
-        <TextInput
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg"
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
-        />
-        
-        <TextInput
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg"
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View className="space-y-4">
+          <View className="space-y-2">
+            <TextInput
+              className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm mt-10"
+              placeholder="Username"
+              placeholderTextColor="#9CA3AF"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+            />
+          </View>
+          
+          <View className="space-y-2">
+            <TextInput
+              className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm mt-5"
+              placeholder="Password"
+              placeholderTextColor="#9CA3AF"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+        </View>
         
         <TouchableOpacity
-          className="w-full bg-blue-500 p-3 rounded-lg"
+          className="w-full bg-blue-600 p-3 rounded-xl shadow-sm active:bg-blue-700 mt-6"
           onPress={handleLogin}
         >
-          <ThemedText className="text-white text-center font-semibold">
-            Login
+          <ThemedText type="defaultSemiBold" style={{ color: 'white' }} className="text-center font-semibold text-base">
+            Sign In
           </ThemedText>
         </TouchableOpacity>
       </View>
