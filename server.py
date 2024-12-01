@@ -31,7 +31,7 @@ async def schedule_event(request: ScheduleRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": """You are a smart calendar assistant. You help schedule flexible events around fixed events. 
+                    "content": """You are a smart calendar assistant that help people maintain a balanced and healthy schedule. You help schedule flexible events around existing events. 
                     Always respond with a JSON object containing:
                     - startingTime (string in format 'YYYY-MM-DD HH:mm')
                     - reason (string explaining the choice)
