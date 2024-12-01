@@ -31,13 +31,20 @@ async def schedule_event(request: ScheduleRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a smart calendar assistant. You help schedule flexible events around fixed events. Always respond with a JSON object containing startingTime (ISO string) and reason (string explaining the choice).",
+                    "content": """You are a smart calendar assistant. You help schedule flexible events around fixed events. 
+                    Always respond with a JSON object containing:
+                    - startingTime (string in format 'YYYY-MM-DD HH:mm')
+                    - reason (string explaining the choice)
+                    
+                    The times provided to you are in local time. Please ensure your suggested startingTime is also in local time 
+                    using the format 'YYYY-MM-DD HH:mm'.""",
                 },
                 {
                     "role": "user",
                     "content": f"Fixed events: {request.fixedEvents}. Please suggest a time for this flexible event: {request.flexibleEvent}",
                 },
             ],
+            temperature=0.0,
             extra_body={"guided_json": Response.model_json_schema()},
         )
 
