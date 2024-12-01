@@ -6,6 +6,8 @@ interface AISuggestion {
   reason: string;
 }
 
+const timeOffset = 6;
+
 export const aiService = {
   async suggestTime(fixedEvents: Event[], flexibleEvent: Event): Promise<AISuggestion | null> {
     try {
@@ -34,12 +36,6 @@ export const aiService = {
 
       const suggestion = await response.json();
       console.log('Raw suggestion:', suggestion);
-      
-      // Convert the suggested time from local format to ISO string
-      if (suggestion && suggestion.startingTime) {
-        const [datePart, timePart] = suggestion.startingTime.split(' ');
-        suggestion.startingTime = new Date(`${datePart}T${timePart}`).toISOString();
-      }
       
       return suggestion as AISuggestion;
       

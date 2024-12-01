@@ -69,7 +69,7 @@ export default function AddEventScreen() {
 
             // Update the event with the suggestion
             newEvent.aiSuggestion = suggestionData;
-            newEvent.startTime = suggestionData.startingTime;
+            newEvent.startTime = new Date(suggestionData.startingTime).toISOString();
             
             // Calculate end time
             const durationInMs = (newEvent.duration as number) * 60000;
