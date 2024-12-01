@@ -11,7 +11,11 @@ export default function AIInsightsScreen() {
 
   const loadEvents = async () => {
     const events = await storage.getEvents();
-    setFlexibleEvents(events.filter(event => event.type === 'flexible' && event.aiSuggestion));
+    const filteredEvents = events.filter(event => event.type === 'flexible' && event.aiSuggestion);
+    const sortedEvents = filteredEvents.sort((a, b) => 
+      new Date(a.aiSuggestion!.startingTime).getTime() - new Date(b.aiSuggestion!.startingTime).getTime()
+    );
+    setFlexibleEvents(sortedEvents);
   };
 
   const onRefresh = async () => {
