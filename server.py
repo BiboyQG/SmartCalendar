@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 from openai import OpenAI
 import uvicorn
+from typing import Optional
 
 app = FastAPI()
 client = OpenAI()
@@ -17,6 +18,15 @@ class ScheduleRequest(BaseModel):
 class Response(BaseModel):
     startingTime: datetime
     reason: str
+
+
+class ChatRequest(BaseModel):
+    message: str
+    events: str  # JSON string of current events
+
+
+class ChatResponse(BaseModel):
+    event_id: Optional[str] = None
 
 
 @app.post("/schedule")
@@ -55,6 +65,40 @@ async def schedule_event(request: ScheduleRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/reschedule_id")
+async def process_chat(request: ChatRequest):
+    try:
+        events = json.loads(request.events)
+        response = client.chat.completions.create(
+            model="Qwen/Qwen2.5-32B-Instruct-AWQ",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are a smart calendar assistant that help people maintain a balanced and healthy schedule. You help schedule flexible events around existing events.
+                    When users ask about rescheduling events, analyze their request and respond the correct event ID that they're talking about. If they specifically request to reschedule an event, try to identify which event they're talking about from their message and respond with the event ID with a JSON object containing:
+                    - event_id (string)
+
+                    If you cannot identify the event ID, respond with null.
+                    """,
+                },
+                {
+                    "role": "user",
+                    "content": f"Current events: {events}\n\nUser message: {request.message}",
+                },
+            ],
+            temperature=0.0,
+            extra_body={"guided_json": ChatResponse.model_json_schema()},
+        )
+        
+        # Parse the AI response and return it as a proper JSON object
+        ai_response = json.loads(response.choices[0].message.content)
+        return ChatResponse(**ai_response)
+
+    except Exception as e:
+        print(f"Error in process_chat: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

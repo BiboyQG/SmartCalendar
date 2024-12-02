@@ -25,6 +25,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol name="sparkles" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: 'Chat',
+          tabBarIcon: ({ color }) => <IconSymbol name="t.bubble" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

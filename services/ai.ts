@@ -6,6 +6,10 @@ interface AISuggestion {
   reason: string;
 }
 
+interface RescheduleResponse {
+  event_id: string;
+}
+
 const timeOffset = 6;
 
 export const aiService = {
@@ -43,5 +47,24 @@ export const aiService = {
       console.error('Error getting AI suggestion:', error);
       return null;
     }
+  },
+
+  async identifyEventToReschedule(message: string, events: Event[]): Promise<RescheduleResponse> {
+    const response = await fetch("http://localhost:8000/reschedule_id", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        message: message,
+        events: JSON.stringify(events)
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get AI response');
+    }
+
+    return response.json();
   }
 }; 
