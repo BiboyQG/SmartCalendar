@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { View, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Button } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -18,6 +18,46 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [pendingEvent, setPendingEvent] = useState<Event | null>(null);
+  const [pendingEvents, setPendingEvents] = useState<Event[] | null>(null);
+
+  const handleConfirm = useCallback(async () => {
+    if (!pendingEvent || !pendingEvents) return;
+    
+    // Save the updated events
+    await storage.saveEvents(pendingEvents);
+    
+    // Add confirmation message
+    const confirmMessage: Message = {
+      id: Date.now().toString(),
+      text: "Changes confirmed! The event has been rescheduled.",
+      sender: 'ai',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, confirmMessage]);
+    
+    // Reset confirmation state
+    setShowConfirmation(false);
+    setPendingEvent(null);
+    setPendingEvents(null);
+  }, [pendingEvent, pendingEvents]);
+
+  const handleCancel = useCallback(() => {
+    // Add cancellation message
+    const cancelMessage: Message = {
+      id: Date.now().toString(),
+      text: "Changes cancelled. The event will keep its original time.",
+      sender: 'ai',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, cancelMessage]);
+    
+    // Reset confirmation state
+    setShowConfirmation(false);
+    setPendingEvent(null);
+    setPendingEvents(null);
+  }, []);
 
   const sendMessage = useCallback(async () => {
     if (!inputText.trim()) return;
@@ -58,7 +98,7 @@ export default function ChatScreen() {
             const suggestionData = typeof suggestion === 'string' ? JSON.parse(suggestion) : suggestion;
             suggestionData.startingTime = new Date(suggestionData.startingTime).toISOString();
             
-            // Update the selected event with new times
+            // Create updated event but don't save it yet
             const updatedEvent: Event = {
               ...selectedEvent,
               startTime: suggestionData.startingTime,
@@ -66,13 +106,14 @@ export default function ChatScreen() {
               aiSuggestion: suggestionData
             };
 
-            // Update the events in storage
-            console.log("[Debug] Events before update:", events);
+            // Prepare updated events but don't save yet
             const updatedEvents = events.map(event => 
               event.id === selectedEvent.id ? updatedEvent : event
             );
-            await storage.saveEvents(updatedEvents);
-            console.log("[Debug] Events after update:", updatedEvents);
+            
+            // Store pending changes
+            setPendingEvent(updatedEvent);
+            setPendingEvents(updatedEvents);
             
             const suggestionMessage: Message = {
                 id: (Date.now() + 2).toString(),
@@ -81,6 +122,9 @@ export default function ChatScreen() {
                 timestamp: new Date(),
             };
             setMessages(prev => [...prev, suggestionMessage]);
+            
+            // Show confirmation buttons
+            setShowConfirmation(true);
         }
       } else {
         const aiMessage: Message = {
@@ -137,6 +181,22 @@ export default function ChatScreen() {
             </View>
           </View>
         ))}
+        
+        {/* Confirmation buttons */}
+        {showConfirmation && (
+          <View className="flex-row justify-center space-x-4 my-4">
+            <Button
+              title="Confirm"
+              onPress={handleConfirm}
+              color="#4CAF50"
+            />
+            <Button
+              title="Cancel"
+              onPress={handleCancel}
+              color="#f44336"
+            />
+          </View>
+        )}
       </ScrollView>
 
       <View className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
