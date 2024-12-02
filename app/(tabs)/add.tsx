@@ -140,7 +140,7 @@ export default function AddEventScreen() {
         onChangeText={setLocation}
       />
 
-      <View className="flex-row items-center mb-4">
+      <View className="flex-row items-center mb-4 justify-between">
         <ThemedText>Flexible Event</ThemedText>
         <Switch
           value={type === 'flexible'}
