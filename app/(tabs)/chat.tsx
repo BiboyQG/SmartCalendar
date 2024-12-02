@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { aiService } from '@/services/ai';
+import { format } from 'date-fns';
 
 interface Message {
   id: string;
@@ -34,22 +35,19 @@ export default function ChatScreen() {
       const events = await storage.getEvents();
       const data = await aiService.identifyEventToReschedule(inputText, events);
       console.log('Response data:', data);
+
+      const selectedEvent = events.find(event => event.id === data.event_id);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: data.event_id 
-          ? `Found event with ID: ${data.event_id}` 
+          ? `Found event: ${selectedEvent?.title} at ${selectedEvent?.location} from ${selectedEvent?.startTime ? format(new Date(selectedEvent.startTime), 'HH:mm') : ''} to ${selectedEvent?.endTime ? format(new Date(selectedEvent.endTime), 'HH:mm') : ''}` 
           : "I couldn't identify which event you're referring to. Could you please be more specific?",
         sender: 'ai',
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiMessage]);
-      const selectedEvent = events.find(event => event.id === data.event_id);
-
-      if (selectedEvent) {
-        console.log('Selected event:', selectedEvent);
-      }
     } catch (error) {
       console.error('Error getting AI response:', error);
       
