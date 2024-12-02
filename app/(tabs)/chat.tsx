@@ -28,7 +28,6 @@ export default function ChatScreen() {
       timestamp: new Date(),
     };
 
-    // Store the input text before clearing it
     const messageText = inputText.trim();
     
     setMessages(prev => [...prev, userMessage]);
@@ -41,16 +40,40 @@ export default function ChatScreen() {
 
       const selectedEvent = events.find(event => event.id === data.event_id);
       
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: data.event_id 
-          ? `Found event: ${selectedEvent?.title} at ${selectedEvent?.location} from ${selectedEvent?.startTime ? format(new Date(selectedEvent.startTime), 'HH:mm') : ''} to ${selectedEvent?.endTime ? format(new Date(selectedEvent.endTime), 'HH:mm') : ''}` 
-          : "I couldn't identify which event you're referring to. Could you please be more specific?",
-        sender: 'ai',
-        timestamp: new Date(),
-      };
+      if (data.event_id && selectedEvent) {
+        // First response confirming the event
+        const confirmMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: `I'll help you reschedule: ${selectedEvent.title} at ${selectedEvent.location} from ${selectedEvent.startTime ? format(new Date(selectedEvent.startTime), 'HH:mm') : ''} to ${selectedEvent.endTime ? format(new Date(selectedEvent.endTime), 'HH:mm') : ''}`,
+          sender: 'ai',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, confirmMessage]);
 
-      setMessages(prev => [...prev, aiMessage]);
+        // Get the rescheduling suggestion
+        const otherEvents = events.filter(event => event.id !== data.event_id);
+        const suggestion = await aiService.suggestRescheduleTime(selectedEvent, otherEvents);
+        if (suggestion) {
+            const suggestionData = typeof suggestion === 'string' ? JSON.parse(suggestion) : suggestion;
+            suggestionData.startingTime = new Date(suggestionData.startingTime).toISOString();
+          
+            const suggestionMessage: Message = {
+                id: (Date.now() + 2).toString(),
+                text: `I suggest rescheduling to ${format(new Date(suggestionData.startingTime), 'HH:mm')}. ${suggestionData.reason}`,
+                sender: 'ai',
+                timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, suggestionMessage]);
+        }
+      } else {
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "I couldn't identify which event you're referring to. Could you please be more specific?",
+          sender: 'ai',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      }
     } catch (error) {
       console.error('Error getting AI response:', error);
       

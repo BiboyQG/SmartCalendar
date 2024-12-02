@@ -29,6 +29,11 @@ class ChatResponse(BaseModel):
     event_id: Optional[str] = None
 
 
+class RescheduleTimeRequest(BaseModel):
+    event: str  # JSON string of event to reschedule
+    fixedEvents: str  # JSON string of list of dictionaries
+
+
 @app.post("/schedule")
 async def schedule_event(request: ScheduleRequest):
     try:
@@ -99,6 +104,44 @@ async def process_chat(request: ChatRequest):
         print(f"Error in process_chat: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
+
+@app.post("/reschedule_time")
+async def reschedule_time(request: RescheduleTimeRequest):
+    try:
+        # Parse JSON strings to ensure they're valid
+        event_to_reschedule = json.loads(request.event)
+        fixed_events = json.loads(request.fixedEvents)
+
+        response = client.chat.completions.create(
+            model="Qwen/Qwen2.5-32B-Instruct-AWQ",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are a smart calendar assistant that helps people maintain a balanced and healthy schedule. 
+                    You help reschedule events to better times. 
+                    Always respond with a JSON object containing:
+                    - startingTime (string in format 'YYYY-MM-DD HH:mm')
+                    - reason (string explaining why this new time is better)
+                    
+                    The times provided to you are in local time. Please ensure your suggested startingTime is also in local time 
+                    using the format 'YYYY-MM-DD HH:mm'.""",
+                },
+                {
+                    "role": "user",
+                    "content": f"Fixed events: {request.fixedEvents}. Please suggest a new time for this event: {request.event}",
+                },
+            ],
+            temperature=0.0,
+            extra_body={"guided_json": Response.model_json_schema()},
+        )
+
+        return response.choices[0].message.content
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON in request")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

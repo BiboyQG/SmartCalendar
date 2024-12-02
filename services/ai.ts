@@ -66,5 +66,46 @@ export const aiService = {
     }
 
     return response.json();
+  },
+
+  async suggestRescheduleTime(eventToReschedule: Event, fixedEvents: Event[]): Promise<AISuggestion | null> {
+    try {
+      // Convert UTC times to local times for fixed events
+      const localFixedEvents = fixedEvents.map(event => ({
+        ...event,
+        startTime: event.startTime ? format(new Date(event.startTime), 'yyyy-MM-dd HH:mm') : undefined,
+        endTime: event.endTime ? format(new Date(event.endTime), 'yyyy-MM-dd HH:mm') : undefined
+      }));
+
+      // Convert the event to reschedule to local time
+      const localEventToReschedule = {
+        ...eventToReschedule,
+        startTime: eventToReschedule.startTime ? format(new Date(eventToReschedule.startTime), 'yyyy-MM-dd HH:mm') : undefined,
+        endTime: eventToReschedule.endTime ? format(new Date(eventToReschedule.endTime), 'yyyy-MM-dd HH:mm') : undefined
+      };
+
+      const response = await fetch("http://localhost:8000/reschedule_time", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          event: JSON.stringify(localEventToReschedule),
+          fixedEvents: JSON.stringify(localFixedEvents)
+        })
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, response: ${errorBody}`);
+      }
+
+      const suggestion = await response.json();
+      return suggestion as AISuggestion;
+      
+    } catch (error) {
+      console.error('Error getting reschedule suggestion:', error);
+      return null;
+    }
   }
 }; 
