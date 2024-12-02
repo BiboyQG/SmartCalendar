@@ -101,7 +101,7 @@ export default function ChatScreen() {
       <View className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <View className="flex-row items-center space-x-2">
           <TextInput
-            className="flex-1 p-3 bg-gray-100 dark:bg-gray-800 rounded-full"
+            className="flex-1 p-3 bg-gray-100 dark:bg-gray-800 rounded-full mr-3"
             placeholder="Type a message..."
             value={inputText}
             onChangeText={setInputText}
