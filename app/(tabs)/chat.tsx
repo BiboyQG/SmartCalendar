@@ -5,6 +5,7 @@ import { storage } from '@/utils/storage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { aiService } from '@/services/ai';
 import { format } from 'date-fns';
+import { Event } from '@/types/event';
 
 interface Message {
   id: string;
@@ -56,7 +57,23 @@ export default function ChatScreen() {
         if (suggestion) {
             const suggestionData = typeof suggestion === 'string' ? JSON.parse(suggestion) : suggestion;
             suggestionData.startingTime = new Date(suggestionData.startingTime).toISOString();
-          
+            
+            // Update the selected event with new times
+            const updatedEvent: Event = {
+              ...selectedEvent,
+              startTime: suggestionData.startingTime,
+              endTime: new Date(new Date(suggestionData.startingTime).getTime() + (selectedEvent.duration || 0) * 60000).toISOString(),
+              aiSuggestion: suggestionData
+            };
+
+            // Update the events in storage
+            console.log("[Debug] Events before update:", events);
+            const updatedEvents = events.map(event => 
+              event.id === selectedEvent.id ? updatedEvent : event
+            );
+            await storage.saveEvents(updatedEvents);
+            console.log("[Debug] Events after update:", updatedEvents);
+            
             const suggestionMessage: Message = {
                 id: (Date.now() + 2).toString(),
                 text: `I suggest rescheduling to ${format(new Date(suggestionData.startingTime), 'HH:mm')}. ${suggestionData.reason}`,
