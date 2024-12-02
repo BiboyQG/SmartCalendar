@@ -28,12 +28,15 @@ export default function ChatScreen() {
       timestamp: new Date(),
     };
 
+    // Store the input text before clearing it
+    const messageText = inputText.trim();
+    
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
 
     try {
       const events = await storage.getEvents();
-      const data = await aiService.identifyEventToReschedule(inputText, events);
+      const data = await aiService.identifyEventToReschedule(messageText, events);
       console.log('Response data:', data);
 
       const selectedEvent = events.find(event => event.id === data.event_id);
