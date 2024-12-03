@@ -47,7 +47,7 @@ async def schedule_event(request: ScheduleRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": """You are a smart calendar assistant that help people maintain a balanced and healthy schedule. You help schedule flexible events around existing events. 
+                    "content": """You are a smart calendar assistant that help people maintain a balanced and healthy schedule. You help schedule flexible events around existing events.
 Always respond with a JSON object containing:
 - startingTime (string in format 'YYYY-MM-DD HH:mm')
 - reason (string explaining the choice)
@@ -84,8 +84,7 @@ async def process_chat(request: ChatRequest):
 When users ask about rescheduling events, analyze their request and respond the correct event ID that they're talking about. If they specifically request to reschedule an event, try to identify which event they're talking about from their message and respond with the event ID with a JSON object containing:
 - event_id (string)
 
-If you cannot identify the event ID, respond with null.
-                    """,
+If you cannot identify the event ID, respond with null.""",
                 },
                 {
                     "role": "user",
@@ -117,7 +116,7 @@ async def reschedule_time(request: RescheduleTimeRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": """You are a smart calendar assistant that helps people maintain a balanced and healthy schedule. You help reschedule events to better times. 
+                    "content": """You are a smart calendar assistant that helps people maintain a balanced and healthy schedule. You help reschedule events to better times.
 Always respond with a JSON object containing:
 - startingTime (string in format 'YYYY-MM-DD HH:mm')
 - reason (string explaining why this new time is better)
