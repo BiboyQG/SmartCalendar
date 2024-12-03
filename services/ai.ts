@@ -68,7 +68,7 @@ export const aiService = {
     return response.json();
   },
 
-  async suggestRescheduleTime(eventToReschedule: Event, fixedEvents: Event[]): Promise<AISuggestion | null> {
+  async suggestRescheduleTime(eventToReschedule: Event, fixedEvents: Event[], message: string): Promise<AISuggestion | null> {
     try {
       // Convert UTC times to local times for fixed events
       const localFixedEvents = fixedEvents.map(event => ({
@@ -91,7 +91,8 @@ export const aiService = {
         },
         body: JSON.stringify({
           event: JSON.stringify(localEventToReschedule),
-          fixedEvents: JSON.stringify(localFixedEvents)
+          fixedEvents: JSON.stringify(localFixedEvents),
+          message: message
         })
       });
 

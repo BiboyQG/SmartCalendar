@@ -93,7 +93,7 @@ export default function ChatScreen() {
 
         // Get the rescheduling suggestion
         const otherEvents = events.filter(event => event.id !== data.event_id);
-        const suggestion = await aiService.suggestRescheduleTime(selectedEvent, otherEvents);
+        const suggestion = await aiService.suggestRescheduleTime(selectedEvent, otherEvents, messageText);
         if (suggestion) {
             const suggestionData = typeof suggestion === 'string' ? JSON.parse(suggestion) : suggestion;
             suggestionData.startingTime = new Date(suggestionData.startingTime).toISOString();

@@ -32,6 +32,7 @@ class ChatResponse(BaseModel):
 class RescheduleTimeRequest(BaseModel):
     event: str  # JSON string of event to reschedule
     fixedEvents: str  # JSON string of list of dictionaries
+    message: str  # User's original message
 
 
 @app.post("/schedule")
@@ -128,7 +129,7 @@ async def reschedule_time(request: RescheduleTimeRequest):
                 },
                 {
                     "role": "user",
-                    "content": f"Fixed events: {request.fixedEvents}. Please suggest a new time for this event: {request.event}",
+                    "content": f"User's request: {request.message}\nExisting events: {request.fixedEvents}. Please suggest a new time for this event: {request.event}",
                 },
             ],
             temperature=0.0,
