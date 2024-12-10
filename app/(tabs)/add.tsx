@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Switch, ActivityIndicator, ScrollView } from 'react-native';
+import { View, TextInput, TouchableOpacity, Switch, ActivityIndicator, ScrollView, Text } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
@@ -228,9 +228,9 @@ export default function AddEventScreen() {
           {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <ThemedText className="text-white text-center font-medium text-base">
+            <Text className="text-white text-center font-medium text-base">
               Add Event
-            </ThemedText>
+            </Text>
           )}
         </TouchableOpacity>
       </View>
