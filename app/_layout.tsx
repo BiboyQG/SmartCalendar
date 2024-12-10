@@ -26,15 +26,16 @@ export default function RootLayout() {
   useEffect(() => {
     if (!navigationState?.key) return;
 
-    const inAuthGroup = segments[0] === '(tabs)';
+    // Consider both (tabs) and event routes as protected routes
+    const inProtectedRoute = segments[0] === '(tabs)' || segments[0] === 'event';
 
     const checkAuth = async () => {
       const user = await storage.getUser();
       
-      if (!user && inAuthGroup) {
+      if (!user && inProtectedRoute) {
         // Redirect to login if no user and trying to access protected routes
         router.replace('/login');
-      } else if (user && !inAuthGroup) {
+      } else if (user && !inProtectedRoute && segments[0] !== '+not-found') {
         // Redirect to home if user exists and on auth screens
         router.replace('/(tabs)');
       }
@@ -58,6 +59,16 @@ export default function RootLayout() {
       <Stack initialRouteName="login">
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="event/[id]" 
+          options={{ 
+            title: 'Event Details',
+            headerTintColor: colorScheme === 'dark' ? '#fff' : '#000',
+            headerStyle: {
+              backgroundColor: colorScheme === 'dark' ? '#111827' : '#fff',
+            }
+          }} 
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { format } from 'date-fns';
 import { useFocusEffect } from 'expo-router';
@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
 import type { Event } from '@/types/event';
+import { router } from 'expo-router';
 
 export default function ScheduleScreen() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -53,6 +54,10 @@ export default function ScheduleScreen() {
     return marked;
   };
 
+  const navigateToEventDetail = (eventId: string) => {
+    router.push(`/event/${eventId}`);
+  };
+
   return (
     <View className="flex-1 bg-white dark:bg-gray-900">
       <Calendar
@@ -72,23 +77,50 @@ export default function ScheduleScreen() {
         </ThemedText>
         
         {getDayEvents().map(event => (
-          <View 
+          <TouchableOpacity 
             key={event.id}
-            className="p-4 mb-2 bg-gray-100 dark:bg-gray-800 rounded-lg"
+            onPress={() => navigateToEventDetail(event.id)}
+            className="mb-3"
           >
-            <ThemedText type="defaultSemiBold">{event.title}</ThemedText>
-            <ThemedText>{event.location}</ThemedText>
-            {event.startTime && (
-              <ThemedText>
-                {format(new Date(event.startTime), 'HH:mm')}
-                {event.endTime && ` - ${format(new Date(event.endTime), 'HH:mm')}`}
-              </ThemedText>
-            )}
-            <ThemedText className="text-gray-600 dark:text-gray-400">
-              {event.type}
+            <View className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+              <View className="flex-row justify-between items-start mb-2">
+                <ThemedText type="defaultSemiBold" className="flex-1 mr-2">
+                  {event.title}
+                </ThemedText>
+                <View className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded">
+                  <ThemedText className="text-xs text-blue-800 dark:text-blue-200">
+                    {event.type}
+                  </ThemedText>
+                </View>
+              </View>
+              
+              <View className="space-y-1">
+                <View className="flex-row items-center">
+                  <ThemedText className="text-gray-600 dark:text-gray-400">
+                    📍 {event.location}
+                  </ThemedText>
+                </View>
+                
+                {event.startTime && (
+                  <View className="flex-row items-center">
+                    <ThemedText className="text-gray-600 dark:text-gray-400">
+                      🕒 {format(new Date(event.startTime), 'HH:mm')}
+                      {event.endTime && ` - ${format(new Date(event.endTime), 'HH:mm')}`}
+                    </ThemedText>
+                  </View>
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+        
+        {getDayEvents().length === 0 && (
+          <View className="py-8">
+            <ThemedText className="text-center text-gray-500">
+              No events scheduled for this day
             </ThemedText>
           </View>
-        ))}
+        )}
       </ScrollView>
     </View>
   );
