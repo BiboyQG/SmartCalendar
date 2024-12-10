@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { View, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Button } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
@@ -21,6 +21,20 @@ export default function ChatScreen() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingEvent, setPendingEvent] = useState<Event | null>(null);
   const [pendingEvents, setPendingEvents] = useState<Event[] | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const welcomeMessage: Message = {
+        id: Date.now().toString(),
+        text: "Hello, I'm your personal schedule AI assistant! How can I help you today?",
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleConfirm = useCallback(async () => {
     if (!pendingEvent || !pendingEvents) return;
