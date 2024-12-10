@@ -158,7 +158,6 @@ export default function AddEventScreen() {
           <Switch
             value={type === 'flexible'}
             onValueChange={(value: boolean) => setType(value ? 'flexible' : 'fixed')}
-            ios_backgroundColor="#3B82F6"
           />
         </View>
 
