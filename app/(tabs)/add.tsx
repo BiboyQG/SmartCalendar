@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
+import { View, TextInput, TouchableOpacity, Switch, ActivityIndicator, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
@@ -125,81 +125,115 @@ export default function AddEventScreen() {
   };
 
   return (
-    <View className="flex-1 p-4 bg-white dark:bg-gray-900">
-      <TextInput
-        className="p-2 mb-4 border border-gray-300 dark:border-gray-700 rounded"
-        placeholder="Event Title"
-        value={title}
-        onChangeText={setTitle}
-      />
-      
-      <TextInput
-        className="p-2 mb-4 border border-gray-300 dark:border-gray-700 rounded"
-        placeholder="Location"
-        value={location}
-        onChangeText={setLocation}
-      />
-
-      <View className="flex-row items-center mb-4 justify-between">
-        <ThemedText>Flexible Event</ThemedText>
-        <Switch
-          value={type === 'flexible'}
-          onValueChange={(value: boolean) => setType(value ? 'flexible' : 'fixed')}
-        />
-      </View>
-
-      {type === 'flexible' ? (
-        <View className="mb-4">
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <View className="p-6">
+        <View className="mb-6">
+          <ThemedText className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-400">
+            Event Title
+          </ThemedText>
           <TextInput
-            className="p-2 border border-gray-300 dark:border-gray-700 rounded"
-            placeholder="Duration (minutes)"
-            value={duration}
-            onChangeText={setDuration}
-            keyboardType="numeric"
+            className="p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
+            placeholder="Enter event title"
+            placeholderTextColor="#9CA3AF"
+            value={title}
+            onChangeText={setTitle}
           />
         </View>
-      ) : (
-        <View className="mb-4">
-          <View className="mb-2">
-            <ThemedText>Start Time (YYYY-MM-DD HH:mm):</ThemedText>
-            <TextInput
-              className="p-2 border border-gray-300 dark:border-gray-700 rounded"
-              placeholder="2024-03-15 14:30"
-              value={startTime}
-              onChangeText={setStartTime}
-            />
-          </View>
-          <View>
-            <ThemedText>End Time (YYYY-MM-DD HH:mm):</ThemedText>
-            <TextInput
-              className="p-2 border border-gray-300 dark:border-gray-700 rounded"
-              placeholder="2024-03-15 15:30"
-              value={endTime}
-              onChangeText={setEndTime}
-            />
-          </View>
+        
+        <View className="mb-6">
+          <ThemedText className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-400">
+            Location
+          </ThemedText>
+          <TextInput
+            className="p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
+            placeholder="Enter location"
+            placeholderTextColor="#9CA3AF"
+            value={location}
+            onChangeText={setLocation}
+          />
         </View>
-      )}
 
-      <TextInput
-        className="p-2 mb-4 h-32 border border-gray-300 dark:border-gray-700 rounded"
-        placeholder="Notes"
-        multiline
-        value={note}
-        onChangeText={setNote}
-      />
+        <View className="flex-row items-center mb-6 justify-between bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <ThemedText className="text-base font-medium">Flexible Event</ThemedText>
+          <Switch
+            value={type === 'flexible'}
+            onValueChange={(value: boolean) => setType(value ? 'flexible' : 'fixed')}
+            ios_backgroundColor="#3B82F6"
+          />
+        </View>
 
-      <TouchableOpacity
-        className="bg-blue-500 p-3 rounded"
-        onPress={handleSubmit}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
+        {type === 'flexible' ? (
+          <View className="mb-6">
+            <ThemedText className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-400">
+              Duration (minutes)
+            </ThemedText>
+            <TextInput
+              className="p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
+              placeholder="Enter duration in minutes"
+              placeholderTextColor="#9CA3AF"
+              value={duration}
+              onChangeText={setDuration}
+              keyboardType="numeric"
+            />
+          </View>
         ) : (
-          <ThemedText className="text-white text-center">Add Event</ThemedText>
+          <View className="mb-6">
+            <View className="mb-4">
+              <ThemedText className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-400">
+                Start Time (YYYY-MM-DD HH:mm)
+              </ThemedText>
+              <TextInput
+                className="p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
+                placeholder="2024-03-15 14:30"
+                placeholderTextColor="#9CA3AF"
+                value={startTime}
+                onChangeText={setStartTime}
+              />
+            </View>
+            <View>
+              <ThemedText className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-400">
+                End Time (YYYY-MM-DD HH:mm)
+              </ThemedText>
+              <TextInput
+                className="p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700"
+                placeholder="2024-03-15 15:30"
+                placeholderTextColor="#9CA3AF"
+                value={endTime}
+                onChangeText={setEndTime}
+              />
+            </View>
+          </View>
         )}
-      </TouchableOpacity>
-    </View>
+
+        <View className="mb-6">
+          <ThemedText className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-400">
+            Notes
+          </ThemedText>
+          <TextInput
+            className="p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 min-h-[120px]"
+            placeholder="Add any additional notes"
+            placeholderTextColor="#9CA3AF"
+            multiline
+            value={note}
+            onChangeText={setNote}
+            textAlignVertical="top"
+          />
+        </View>
+
+        <TouchableOpacity
+          className={`p-4 rounded-xl ${isLoading ? 'bg-blue-400' : 'bg-blue-500'} shadow-sm`}
+          onPress={handleSubmit}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <ThemedText className="text-white text-center font-medium text-base">
+              Add Event
+            </ThemedText>
+          )}
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 } 
