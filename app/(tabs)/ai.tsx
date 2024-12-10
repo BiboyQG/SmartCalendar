@@ -36,8 +36,6 @@ export default function AIInsightsScreen() {
       }
     >
       <View className="p-4">
-        <ThemedText type="title" className="mb-6">AI Suggestions</ThemedText>
-        
         {flexibleEvents.map(event => (
           <View 
             key={event.id}
