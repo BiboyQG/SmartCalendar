@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { View, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Button } from 'react-native';
+import { Text, View, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Button } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -187,11 +187,15 @@ export default function ChatScreen() {
                   : 'bg-gray-200 dark:bg-gray-800'
               }`}
             >
-              <ThemedText
-                className={message.sender === 'user' ? 'text-white' : ''}
-              >
-                {message.text}
-              </ThemedText>
+              {message.sender === 'user' ? (
+                <Text className="text-white text-lg">
+                  {message.text}
+                </Text>
+              ) : (
+                <ThemedText>
+                  {message.text}
+                </ThemedText>
+              )}
             </View>
           </View>
         ))}
