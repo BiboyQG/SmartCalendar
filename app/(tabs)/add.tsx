@@ -228,7 +228,7 @@ export default function AddEventScreen() {
           {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white text-center font-medium text-base">
+            <Text className="text-white text-center font-bold text-base">
               Add Event
             </Text>
           )}
