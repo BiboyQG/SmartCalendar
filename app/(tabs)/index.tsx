@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { storage } from '@/utils/storage';
 import type { Event } from '@/types/event';
 import { router } from 'expo-router';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function ScheduleScreen() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -122,6 +123,13 @@ export default function ScheduleScreen() {
           </View>
         )}
       </ScrollView>
+
+      <TouchableOpacity
+        className="absolute bottom-6 right-6 w-14 h-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+        onPress={() => router.push('/add')}
+      >
+        <IconSymbol name="plus" color="white" size={24} />
+      </TouchableOpacity>
     </View>
   );
 }

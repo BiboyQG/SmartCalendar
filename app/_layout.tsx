@@ -26,8 +26,10 @@ export default function RootLayout() {
   useEffect(() => {
     if (!navigationState?.key) return;
 
-    // Consider both (tabs) and event routes as protected routes
-    const inProtectedRoute = segments[0] === '(tabs)' || segments[0] === 'event';
+    // Consider (tabs) and event routes as protected routes, but allow 'add' route
+    const inProtectedRoute = segments[0] === '(tabs)' || 
+                           segments[0] === 'event' || 
+                           segments[0] === 'add';
 
     const checkAuth = async () => {
       const user = await storage.getUser();
@@ -63,6 +65,18 @@ export default function RootLayout() {
           name="event/[id]" 
           options={{ 
             title: 'Event Details',
+            headerTintColor: colorScheme === 'dark' ? '#fff' : '#000',
+            headerStyle: {
+              backgroundColor: colorScheme === 'dark' ? '#111827' : '#fff',
+            }
+          }} 
+        />
+        <Stack.Screen 
+          name="add" 
+          options={{ 
+            presentation: 'modal',
+            headerShown: true,
+            title: 'Add Event',
             headerTintColor: colorScheme === 'dark' ? '#fff' : '#000',
             headerStyle: {
               backgroundColor: colorScheme === 'dark' ? '#111827' : '#fff',

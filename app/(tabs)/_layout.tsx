@@ -12,13 +12,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="add"
-        options={{
-          title: 'Add Event',
-          tabBarIcon: ({ color }) => <IconSymbol name="plus" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="ai"
         options={{
           title: 'AI Insights',
