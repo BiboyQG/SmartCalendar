@@ -10,7 +10,7 @@ const memoryStorage: {
   events: Event[];
   userData: UserData | null;
 } = {
-  events: [{"duration": 60, "endTime": "2024-12-11T18:00:00.000Z", "id": "1733003579275", "location": "Zoom", "note": "Zoom link: https://zoom.us/j/91234567890", "startTime": "2024-12-11T17:00:00.000Z", "title": "Morning meeting for CS 409", "type": "fixed"}, {"duration": 60, "endTime": "2024-12-11T23:00:00.000Z", "id": "1733003642173", "location": "SCD Room 1001", "note": "Talk to the Professor about the final prototype.", "startTime": "2024-12-11T22:00:00.000Z", "title": "Afternoon appointment for DTX 495", "type": "fixed"}],
+  events: [{"duration": 60, "endTime": "2024-12-17T18:00:00.000Z", "id": "1733003579275", "location": "Zoom", "note": "Zoom link: https://zoom.us/j/91234567890", "startTime": "2024-12-17T17:00:00.000Z", "title": "Morning meeting for CS 409", "type": "fixed"}, {"duration": 60, "endTime": "2024-12-17T23:00:00.000Z", "id": "1733003642173", "location": "SCD Room 1001", "note": "Talk to the Professor about the final prototype.", "startTime": "2024-12-17T22:00:00.000Z", "title": "Afternoon appointment for DTX 495", "type": "fixed"}],
   userData: null
 };
 
